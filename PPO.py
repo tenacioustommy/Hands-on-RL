@@ -43,7 +43,7 @@ class ActorCritic(nn.Module):
         raise NotImplementedError
 
     def act(self,state,memory:Memory):
-        state=torch.from_numpy(state).float().to(device)
+        state= torch.unsqueeze(torch.FloatTensor(state), 0).to(device)
         action_probs=self.action_layer(state)
         dist=torch.distributions.Categorical(action_probs)
         action=dist.sample()
@@ -148,12 +148,12 @@ if __name__ == "__main__":
     timestep=0
     
     for i_episode in range(1,max_episodes+1):
-        state=env.reset()
+        state=env.reset()[0]
         for t in range(max_timesteps):
             timestep+=1
             # Running policy_old:
             action=ppo.policy_old.act(state,memory)
-            state,reward,done,_=env.step(action)
+            state,reward,done,truncated,_=env.step(action)
             
             # Saving reward and is_terminal:
             memory.rewards.append(reward)
